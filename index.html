@@ -1,0 +1,350 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Chinatown Board</title>
+  <style>
+    body {
+      background-color: #a57548;
+      font-family: sans-serif;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 20px;
+    }
+
+    .board {
+      display: grid;
+      grid-template-columns: repeat(3, auto);
+      grid-template-rows: repeat(2, auto);
+      gap: 40px;
+      margin-bottom: 40px;
+    }
+
+    .block {
+      display: grid;
+      gap: 2px;
+    }
+
+    .plot {
+      width: 60px;
+      height: 60px;
+      border: 1px solid #000;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      font-size: 32px;
+      text-align: center;
+      font-weight: bold;
+      flex-direction: column;
+    }
+
+    .plot:empty {
+      border: none;
+      background: transparent;
+    }
+
+    .red {
+      background-color: red;
+      color: white;
+    }
+
+    .blue {
+      background-color: blue;
+      color: white;
+    }
+
+    .green {
+      background-color: green;
+      color: white;
+    }
+
+    .yellow {
+      background-color: gold;
+      color: black;
+    }
+
+    .purple {
+      background-color: purple;
+      color: white;
+    }
+
+    table {
+      border-collapse: collapse;
+      background-color: #ddd;
+    }
+
+    th,
+    td {
+      border: 1px solid #aaa;
+      padding: 8px;
+      text-align: center;
+    }
+
+    .player-cell {
+      font-weight: bold;
+      color: white;
+    }
+
+    .player-red {
+      background-color: red;
+    }
+
+    .player-blue {
+      background-color: blue;
+    }
+
+    .player-green {
+      background-color: green;
+    }
+
+    .player-yellow {
+      background-color: gold;
+      color: black;
+    }
+
+    .player-purple {
+      background-color: purple;
+    }
+
+    .balance-cell,
+    .business-cell {
+      background-color: ivory;
+    }
+
+    .round-table th,
+    .round-table td:first-child {
+      background-color: #ddd;
+    }
+
+    .round-table td:not(:first-child) {
+      background-color: ivory;
+    }
+
+    .deck-grid {
+      display: grid;
+      grid-template-columns: repeat(3, auto);
+      gap: 8px 16px;
+    }
+
+    .active-round {
+      background-color: black !important;
+      color: white !important;
+    }
+
+    .reference-section {
+      display: flex;
+      justify-content: center;
+      gap: 40px;
+      margin-top: 20px;
+      align-items: flex-start;
+    }
+
+    .turn-phases {
+      list-style: disc;
+      padding-left: 20px;
+      margin: 0;
+    }
+  </style>
+</head>
+
+<body>
+  <h2>The Board</h2>
+  <div class="board"></div>
+  <h2>Game State</h2>
+  <div style="display: flex; justify-content: center; gap: 40px; align-items: flex-start; margin-top: 20px;">
+    <table>
+      <thead>
+        <tr>
+          <th>Player</th>
+          <th>Balance</th>
+          <th>Businesses</th>
+        </tr>
+      </thead>
+      <tbody id="player-stats"></tbody>
+    </table>
+
+    <div id="business-deck" style="background: #eee; padding: 10px; border-radius: 10px; min-width: 120px;">
+      <h3 style="margin-top: 0;">Deck</h3>
+      <div class="deck-grid" id="business-deck-grid"></div>
+    </div>
+  </div>
+
+  <script>
+    const businesses = {
+      tea: '☕3', photo: '📷3', seafood: '🦞3', fish: '🐟4', flowers: '🌸4',
+      jewellery: '💎4', laundry: '🧺5', dimsum: '🥟5', takeout: '🥡5',
+      factory: '🏭6', restaurant: '🍽️6', antiques: '🏺6'
+    };
+
+    const ownedPlots = {
+      red: [4, 7, 42],
+      blue: [32, 16],
+      green: [],
+      yellow: [],
+      purple: [71, 72, 75]
+    };;
+    const businessAssignments = { 4: 'tea', 7: 'seafood', 32: 'photo', 72: 'factory', 71: 'factory' };
+    const playerBalances = {
+      red: 50000, blue: 48000, green: 46000, yellow: 47000, purple: 45000
+    };
+    const businessInventory = {
+      red: ['seafood', 'seafood', 'seafood', 'factory'],
+      blue: ['antiques'],
+      green: [], yellow: [], purple: []
+    };
+
+    const businessDeck = {
+      tea: 5,
+      photo: 4,
+      seafood: 3,
+      fish: 4,
+      flowers: 4,
+      jewellery: 4,
+      laundry: 5,
+      dimsum: 5,
+      takeout: 5,
+      factory: 6,
+      restaurant: 6,
+      antiques: 6
+    }
+
+    const board = document.querySelector('.board');
+    const layout = [
+      [null, 1, 2, null, null, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, null, 13, 14, 15, null],
+      [16, 17, 18, 19, 20, 21, 22, 23, null, 24, 25, null, 26, 27, null],
+      [28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42],
+      [43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54, null, null, 55, 56, null, null, 57, 58],
+      [59, 60, null, 61, 62, null, 63, 64, 65, 66, 67, 68, null, 69, 70],
+      [71, 72, 73, 74, 75, 76, 77, 78, 79, 80, 81, 82, 83, 84, 85, null],
+    ];
+
+    layout.forEach((block, index) => {
+      const b = document.createElement('div');
+      b.className = 'block';
+      const isBuilding2or5 = index === 1 || index === 4;
+      const columns = isBuilding2or5 ? 3 : 4;
+      const rows = Math.ceil(block.length / columns);
+      b.style.gridTemplateColumns = `repeat(${columns}, 60px)`;
+      b.style.gridTemplateRows = `repeat(${rows}, 60px)`;
+
+      block.forEach(n => {
+        const div = document.createElement('div');
+        div.className = 'plot';
+        if (n !== null) {
+          let plotOwner = null;
+          for (const [color, plots] of Object.entries(ownedPlots)) {
+            if (plots.includes(n)) {
+              plotOwner = color;
+              break;
+            }
+          }
+          if (plotOwner) {
+            div.classList.add(plotOwner);
+          } else {
+            div.style.backgroundColor = 'gainsboro';
+          }
+          if (businessAssignments[n]) {
+            const businessKey = businessAssignments[n];
+            const entry = businesses[businessKey] || '';
+            const emoji = entry.slice(0, -1);
+            const size = entry.slice(-1);
+            div.innerHTML = `<div>${emoji}</div><div style="font-size:14px; line-height:1;">${size}</div>`;
+          } else {
+            div.textContent = n;
+          }
+        }
+        b.appendChild(div);
+      });
+      board.appendChild(b);
+    });
+
+    const playerStats = document.getElementById('player-stats');
+    Object.entries(playerBalances).forEach(([color, balance]) => {
+      const tr = document.createElement('tr');
+      const tdName = document.createElement('td');
+      tdName.className = `player-cell player-${color}`;
+      tdName.textContent = color.charAt(0).toUpperCase() + color.slice(1);
+      const tdBalance = document.createElement('td');
+      tdBalance.className = 'balance-cell';
+      tdBalance.textContent = `$${balance.toLocaleString()}`;
+      const tdBiz = document.createElement('td');
+      tdBiz.className = 'business-cell';
+      const businessList = (businessInventory[color] || []).map(key => businesses[key]).join(', ');
+      tdBiz.textContent = businessList;
+      tr.appendChild(tdName);
+      tr.appendChild(tdBalance);
+      tr.appendChild(tdBiz);
+      playerStats.appendChild(tr);
+    });
+
+    const businessDeckGrid = document.getElementById('business-deck-grid');
+    Object.entries(businessDeck).forEach(([key, count]) => {
+      const entry = businesses[key] || '';
+      const line = document.createElement('div');
+      line.style.fontSize = '20px';
+      line.textContent = `[${entry}] x${count}`;
+      businessDeckGrid.appendChild(line);
+    });
+  </script>
+  <table class="round-table" style="margin-top: 40px;">
+    <thead>
+      <tr>
+        <th>Current Round</th><th>1</th><th>2</th><th class="active-round">3</th><th>4</th><th>5</th><th>6</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr><td><strong>Plots</strong></td><td>7/5</td><td>4</td><td>4</td><td>4</td><td>4</td><td>0</td></tr>
+      <tr><td><strong>Business Tiles</strong></td><td>6</td><td>5</td><td>5</td><td>5</td><td>5</td><td>0</td></tr>
+    </tbody>
+  </table>
+  <h2>Reference</h2>
+  <div class="reference-section">
+    <table>
+      <thead>
+        <tr>
+          <th></th>
+          <th>1</th>
+          <th>2</th>
+          <th>3</th>
+          <th>4</th>
+          <th>5</th>
+          <th>6</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>Incomplete</td>
+          <td>$10k</td>
+          <td>$20k</td>
+          <td>$40k</td>
+          <td>$60k</td>
+          <td>$80k</td>
+          <td>-</td>
+        </tr>
+        <tr>
+          <td>Incomplete</td>
+          <td>-</td>
+          <td>-</td>
+          <td>$50k</td>
+          <td>$80k</td>
+          <td>$110k</td>
+          <td>$140k</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <ul class="turn-phases">
+      <li>Deal building cards</li>
+      <li>Draw shop tiles</li>
+      <li>Trades</li>
+      <li>Place shop tiles</li>
+      <li>Earn income</li>
+    </ul>
+  </div>
+
+</body>
+
+</html>

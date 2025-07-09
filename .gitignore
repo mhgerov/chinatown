@@ -1,2 +1,3 @@
 __pycache__/
-*.csv
+chinatown_businesses.csv
+chinatown_properties.csv

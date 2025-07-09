@@ -41,3 +41,11 @@ Since this is a static HTML file with no build process:
 
 - `index.html` - Complete application (HTML, CSS, JavaScript)
 - `README.md` - Basic project title
+
+## Environment Notes
+
+- In this environment, python is run with `python3`.
+
+## Script Memories
+
+- `ct.py` script purpose: Currently unknown. Specific functionality needs to be determined and documented.

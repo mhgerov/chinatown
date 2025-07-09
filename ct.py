@@ -10,7 +10,7 @@ import random
 from players import PLAYERS
 
 def init_properties():
-    """Initialize the properties CSV file with 90 properties"""
+    """Initialize the properties CSV file with 85 properties"""
     filename = "chinatown_properties.csv"
     
     if os.path.exists(filename):
@@ -25,15 +25,16 @@ def init_properties():
         # Write header
         writer.writerow(['Property', 'Status', 'Player'])
         
-        # Write 90 properties with initial values
-        for i in range(1, 91):
+        # Write 85 properties with initial values
+        for i in range(1, 86):
             writer.writerow([i, 'deck', ''])
     
-    print(f"Initialized {filename} with 90 properties")
+    print(f"Initialized {filename} with 85 properties")
 
 def init_businesses():
     """Initialize the business tiles CSV file"""
     filename = "chinatown_businesses.csv"
+    ref_filename = "businesses-ref.csv"
     
     if os.path.exists(filename):
         response = input(f"{filename} already exists. Overwrite? (y/n): ")
@@ -41,20 +42,19 @@ def init_businesses():
             print("Initialization cancelled.")
             return
     
-    # Business types and their quantities based on the image
-    businesses = [
-        ("photo", 3, 6),      # 6 Photo tiles of size 3
-        ("teahouse", 4, 6),   # 6 Tea House tiles of size 4
-        ("seafood", 5, 6),    # 6 Sea Food tiles of size 5
-        ("jewelery", 3, 5),   # 5 Jewelry tiles of size 3
-        ("tropical", 4, 5),   # 5 Tropical tiles of size 4
-        ("florist", 5, 5),    # 5 Florist tiles of size 5
-        ("takeout", 3, 4),    # 4 Take Out tiles of size 3
-        ("laundry", 4, 4),    # 4 Laundry tiles of size 4
-        ("dimsum", 5, 4),     # 4 Dim Sum tiles of size 5
-        ("antiques", 3, 3),   # 3 Antiques tiles of size 3
-        ("restaurant", 6, 3), # 3 Restaurant tiles of size 6
-    ]
+    if not os.path.exists(ref_filename):
+        print(f"Error: {ref_filename} not found. This file is required for business initialization.")
+        return
+    
+    # Read business data from reference file
+    businesses = []
+    with open(ref_filename, 'r', newline='') as csvfile:
+        reader = csv.DictReader(csvfile)
+        for row in reader:
+            name = row['Name']
+            size = int(row['Size'])
+            count = size + 3  # Quantity is always size + 3
+            businesses.append((name, size, count))
     
     with open(filename, 'w', newline='') as csvfile:
         writer = csv.writer(csvfile)
@@ -63,12 +63,14 @@ def init_businesses():
         writer.writerow(['Business', 'Status', 'Player'])
         
         # Write business tiles
+        total_tiles = 0
         for business_name, size, count in businesses:
             for i in range(count):
                 tile_name = f"{business_name}{size}"
                 writer.writerow([tile_name, 'deck', ''])
+                total_tiles += 1
     
-    print(f"Initialized {filename} with business tiles")
+    print(f"Initialized {filename} with {total_tiles} business tiles")
 
 def deal_plots(num_cards):
     """Deal plots to players randomly"""

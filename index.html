@@ -173,12 +173,42 @@
   </div>
 
   <script>
+
+    // static data
+    const layout = [
+      [null, 1, 2, null, null, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, null, 13, 14, 15, null],
+      [16, 17, 18, 19, 20, 21, 22, 23, null, 24, 25, null, 26, 27, null],
+      [28, 29, 30, null, 31, 32, 33, null, 34, 35, 36, null, null, 37, 38, 39, null, 40, 41, 42],
+      [43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54, null, null, 55, 56, null, null, 57, 58],
+      [59, 60, null, 61, 62, null, 63, 64, 65, 66, 67, 68, null, 69, 70],
+      [71, 72, 73, 74, 75, 76, 77, 78, 79, 80, 81, 82, 83, 84, 85, null],
+    ];
+
     const businesses = {
-      tea: '☕3', photo: '📷3', seafood: '🦞3', fish: '🐟4', flowers: '🌸4',
-      jewellery: '💎4', laundry: '🧺5', dimsum: '🥟5', takeout: '🥡5',
-      factory: '🏭6', restaurant: '🍽️6', antiques: '🏺6'
+      tea: '☕3', 
+      photo: '📷3', 
+      seafood: '🦞3', 
+      fish: '🐟4',
+      flowers: '🌸4',
+      jewellery: '💎4',
+      laundry: '🧺5',
+      dimsum: '🥟5',
+      takeout: '🥡5',
+      factory: '🏭6',
+      restaurant: '🍽️6',
+      antiques: '🏺6'
     };
 
+    // before game start
+    const players = {
+      red: 'Bob',
+      green: 'Bill',
+      blue: 'Blake',
+      yellow: 'Bernice',
+      purple: 'Becky'
+    }
+
+    // game state
     const ownedPlots = {
       red: [4, 7, 42],
       blue: [32, 16],
@@ -186,40 +216,48 @@
       yellow: [],
       purple: [71, 72, 75]
     };;
-    const businessAssignments = { 4: 'tea', 7: 'seafood', 32: 'photo', 72: 'factory', 71: 'factory' };
-    const playerBalances = {
-      red: 50000, blue: 48000, green: 46000, yellow: 47000, purple: 45000
-    };
+
     const businessInventory = {
       red: ['seafood', 'seafood', 'seafood', 'factory'],
       blue: ['antiques'],
-      green: [], yellow: [], purple: []
+      green: [], 
+      yellow: [], 
+      purple: []
+    };
+
+    const businessAssignments = { 
+      4: 'tea', 
+      7: 'seafood', 
+      32: 'photo', 
+      72: 'factory', 
+      71: 'factory' 
+    };
+
+    const playerBalances = {
+      red: 50000, 
+      green: 46000,
+      blue: 48000, 
+      yellow: 47000,
+      purple: 45000
     };
 
     const businessDeck = {
-      tea: 5,
-      photo: 4,
-      seafood: 3,
-      fish: 4,
-      flowers: 4,
-      jewellery: 4,
-      laundry: 5,
-      dimsum: 5,
-      takeout: 5,
-      factory: 6,
-      restaurant: 6,
-      antiques: 6
+      tea: 6,
+      photo: 6,
+      seafood: 6,
+      fish: 7,
+      flowers: 7,
+      jewellery: 7,
+      laundry: 8,
+      dimsum: 8,
+      takeout: 8,
+      factory: 9,
+      restaurant: 9,
+      antiques: 9
     }
 
+    // page generation code
     const board = document.querySelector('.board');
-    const layout = [
-      [null, 1, 2, null, null, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, null, 13, 14, 15, null],
-      [16, 17, 18, 19, 20, 21, 22, 23, null, 24, 25, null, 26, 27, null],
-      [28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42],
-      [43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54, null, null, 55, 56, null, null, 57, 58],
-      [59, 60, null, 61, 62, null, 63, 64, 65, 66, 67, 68, null, 69, 70],
-      [71, 72, 73, 74, 75, 76, 77, 78, 79, 80, 81, 82, 83, 84, 85, null],
-    ];
 
     layout.forEach((block, index) => {
       const b = document.createElement('div');
@@ -266,7 +304,7 @@
       const tr = document.createElement('tr');
       const tdName = document.createElement('td');
       tdName.className = `player-cell player-${color}`;
-      tdName.textContent = color.charAt(0).toUpperCase() + color.slice(1);
+      tdName.textContent = players[color];
       const tdBalance = document.createElement('td');
       tdBalance.className = 'balance-cell';
       tdBalance.textContent = `$${balance.toLocaleString()}`;
@@ -292,7 +330,7 @@
   <table class="round-table" style="margin-top: 40px;">
     <thead>
       <tr>
-        <th>Current Round</th><th>1</th><th>2</th><th class="active-round">3</th><th>4</th><th>5</th><th>6</th>
+        <th>Current Round</th><th class="active-round">1</th><th>2</th><th>3</th><th>4</th><th>5</th><th>6</th>
       </tr>
     </thead>
     <tbody>

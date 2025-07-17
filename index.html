@@ -159,7 +159,6 @@
       <thead>
         <tr>
           <th>Player</th>
-          <th>Balance</th>
           <th>Businesses</th>
         </tr>
       </thead>
@@ -233,14 +232,6 @@
       71: 'factory'  */
     };
 
-    const playerBalances = {
-      red: 50000, 
-      green: 50000,
-      blue: 50000, 
-      yellow: 50000,
-      purple: 50000
-    };
-
     const businessDeck = {
       photo: 6,
       tea: 6,
@@ -300,20 +291,16 @@
     });
 
     const playerStats = document.getElementById('player-stats');
-    Object.entries(playerBalances).forEach(([color, balance]) => {
+    Object.entries(players).forEach(([color]) => {
       const tr = document.createElement('tr');
       const tdName = document.createElement('td');
       tdName.className = `player-cell player-${color}`;
       tdName.textContent = players[color];
-      const tdBalance = document.createElement('td');
-      tdBalance.className = 'balance-cell';
-      tdBalance.textContent = `$${balance.toLocaleString()}`;
       const tdBiz = document.createElement('td');
       tdBiz.className = 'business-cell';
       const businessList = (businessInventory[color] || []).map(key => businesses[key]).join(', ');
       tdBiz.textContent = businessList;
       tr.appendChild(tdName);
-      tr.appendChild(tdBalance);
       tr.appendChild(tdBiz);
       playerStats.appendChild(tr);
     });

@@ -206,11 +206,6 @@ def deal_businesses(num_cards):
         for row in reader:
             businesses.append(row)
     
-    # Check if any businesses are under review
-    reviewing_businesses = [biz for biz in businesses if biz[1] == 'reviewing']
-    if reviewing_businesses:
-        print("Error: Cannot deal businesses while some are under review. Use 'return-biz' first.")
-        return
     
     # Find businesses that are still in deck
     deck_businesses = [biz for biz in businesses if biz[1] == 'deck']
@@ -229,7 +224,7 @@ def deal_businesses(num_cards):
     for player in PLAYERS:
         for _ in range(num_cards):
             biz = deck_businesses[card_index]
-            biz[1] = 'reviewing'  # Update status
+            biz[1] = 'owned'  # Update status
             biz[2] = player       # Assign player
             card_index += 1
     
@@ -241,9 +236,9 @@ def deal_businesses(num_cards):
     
     print(f"Dealt {num_cards} business tiles to each of {len(PLAYERS)} players")
 
-def return_businesses(player, business_names_str):
-    """Return specified business tiles to deck and mark remaining as owned"""
-    filename = "chinatown_businesses.csv"
+def get_plots(player):
+    """Get comma-separated list of properties owned by a player"""
+    filename = "chinatown_properties.csv"
     
     if not os.path.exists(filename):
         print(f"Error: {filename} not found. Run 'init' first.")
@@ -254,55 +249,21 @@ def return_businesses(player, business_names_str):
         print(f"Error: Invalid player '{player}'. Valid players: {', '.join(PLAYERS)}")
         return
     
-    # Parse business names
-    business_names = [name.strip() for name in business_names_str.split(',')]
-    
-    # Read current businesses
-    businesses = []
+    # Read current properties
+    properties = []
     with open(filename, 'r', newline='') as csvfile:
         reader = csv.reader(csvfile)
         header = next(reader)
         for row in reader:
-            businesses.append(row)
+            properties.append(row)
     
-    # Find player's reviewing businesses
-    player_reviewing = [biz for biz in businesses if biz[1] == 'reviewing' and biz[2] == player]
+    # Find properties owned by the player
+    owned_properties = [prop[0] for prop in properties if prop[1] == 'owned' and prop[2] == player]
     
-    if not player_reviewing:
-        print(f"Error: No business tiles under review for player '{player}'")
-        return
-    
-    # Validate that all specified business names belong to the player and are under review
-    player_business_names = [biz[0] for biz in player_reviewing]
-    invalid_names = [name for name in business_names if name not in player_business_names]
-    if invalid_names:
-        print(f"Error: Business tiles {invalid_names} are not under review by player '{player}'")
-        return
-    
-    # Update business statuses
-    returned_count = 0
-    owned_count = 0
-    
-    for biz in businesses:
-        if biz[1] == 'reviewing' and biz[2] == player:
-            business_name = biz[0]
-            if business_name in business_names:
-                # Return to deck
-                biz[1] = 'deck'
-                biz[2] = ''
-                returned_count += 1
-            else:
-                # Mark as owned
-                biz[1] = 'owned'
-                owned_count += 1
-    
-    # Write updated businesses back to file
-    with open(filename, 'w', newline='') as csvfile:
-        writer = csv.writer(csvfile)
-        writer.writerow(header)
-        writer.writerows(businesses)
-    
-    print(f"Player '{player}': returned {returned_count} business tiles to deck, kept {owned_count} business tiles")
+    if owned_properties:
+        print(','.join(owned_properties))
+    else:
+        print("")
 
 def main():
     if len(sys.argv) < 2:
@@ -312,7 +273,7 @@ def main():
         print("  deal plots <num>             - Deal <num> plots to each player")
         print("  deal biz <num>               - Deal <num> business tiles to each player")
         print("  return-plots <player> <ids>  - Return specified plots to deck, keep rest")
-        print("  return-biz <player> <names>  - Return specified business tiles to deck, keep rest")
+        print("  get-plots <player>           - Get comma-separated list of owned properties")
         return
     
     command = sys.argv[1].lower()
@@ -351,18 +312,17 @@ def main():
         player = sys.argv[2].lower()
         plot_ids_str = sys.argv[3]
         return_plots(player, plot_ids_str)
-    elif command == "return-biz":
-        if len(sys.argv) < 4:
-            print("Usage: python ct.py return-biz <player> <business_names>")
-            print("Example: python ct.py return-biz blue photo3,teahouse4")
+    elif command == "get-plots":
+        if len(sys.argv) < 3:
+            print("Usage: python ct.py get-plots <player>")
+            print("Example: python ct.py get-plots red")
             return
         
         player = sys.argv[2].lower()
-        business_names_str = sys.argv[3]
-        return_businesses(player, business_names_str)
+        get_plots(player)
     else:
         print(f"Unknown command: {command}")
-        print("Available commands: init, deal, return-plots, return-biz")
+        print("Available commands: init, deal, return-plots, get-plots")
 
 if __name__ == "__main__":
     main()

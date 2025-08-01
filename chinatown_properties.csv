@@ -25,8 +25,8 @@ Property,Status,Player
 24,owned,purple
 25,deck,
 26,deck,
-27,reviewing,blue
-28,reviewing,blue
+27,owned,blue
+28,owned,blue
 29,deck,
 30,deck,
 31,owned,yellow
@@ -34,7 +34,7 @@ Property,Status,Player
 33,deck,
 34,deck,
 35,deck,
-36,reviewing,blue
+36,owned,blue
 37,deck,
 38,owned,green
 39,deck,

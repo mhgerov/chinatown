@@ -147,6 +147,19 @@
       padding-left: 20px;
       margin: 0;
     }
+
+    .tooltip {
+      position: absolute;
+      background-color: rgba(0, 0, 0, 0.8);
+      color: white;
+      padding: 4px 8px;
+      border-radius: 4px;
+      font-size: 12px;
+      font-weight: normal;
+      pointer-events: none;
+      z-index: 1000;
+      white-space: nowrap;
+    }
   </style>
 </head>
 
@@ -313,6 +326,26 @@
             const emoji = entry.slice(0, -1);
             const size = entry.slice(-1);
             div.innerHTML = `<div>${emoji}</div><div style="font-size:14px; line-height:1;">${size}</div>`;
+            
+            // Add hover functionality to show property number
+            div.style.position = 'relative';
+            div.addEventListener('mouseenter', function(e) {
+              const tooltip = document.createElement('div');
+              tooltip.className = 'tooltip';
+              tooltip.textContent = `Property ${n}`;
+              document.body.appendChild(tooltip);
+              
+              const rect = div.getBoundingClientRect();
+              tooltip.style.left = (rect.left + rect.width / 2 - tooltip.offsetWidth / 2) + 'px';
+              tooltip.style.top = (rect.top - tooltip.offsetHeight - 5) + 'px';
+            });
+            
+            div.addEventListener('mouseleave', function(e) {
+              const tooltip = document.querySelector('.tooltip');
+              if (tooltip) {
+                tooltip.remove();
+              }
+            });
           } else {
             div.textContent = n;
           }

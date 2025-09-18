@@ -75,17 +75,20 @@ def init_businesses():
 def deal_plots(num_cards):
     """Deal plots to players randomly"""
     filename = "chinatown_properties.csv"
-    
+
     if not os.path.exists(filename):
         print(f"Error: {filename} not found. Run 'init' first.")
         return
-    
+
     # Read current properties
     properties = []
     with open(filename, 'r', newline='') as csvfile:
         reader = csv.reader(csvfile)
         header = next(reader)
         for row in reader:
+            # Ensure row has 3 columns (Property, Status, Player)
+            if len(row) < 3:
+                row.extend([''] * (3 - len(row)))
             properties.append(row)
     
     # Check if any plots are under review

@@ -98,7 +98,7 @@ def deal_plots(num_cards):
         return
     
     # Find properties that are still in deck
-    deck_properties = [prop for prop in properties if prop[1] == 'deck']
+    deck_properties = [prop for prop in properties if prop[1] == 'deck' and prop[2] == '']
     
     # Check if we have enough cards
     total_needed = num_cards * len(PLAYERS)
